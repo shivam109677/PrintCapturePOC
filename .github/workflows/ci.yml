@@ -1,0 +1,22 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-and-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Install Linux test dependencies
+        run: sudo apt-get update && sudo apt-get install -y python3-cups python3-fastapi python3-multipart python3-uvicorn
+      - name: Build Windows monitor
+        run: dotnet build PrintCapturePOC.sln -c Release
+      - name: Check Python
+        run: python3 -m py_compile linux/monitor_cups.py linux/frontend/app.py mock_server/app.py
+      - name: Check shell scripts
+        run: bash -n linux/scripts/*.sh linux/scripts/capture-backend

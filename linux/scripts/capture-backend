@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ $# -eq 0 ]]; then
+  printf 'direct capture "PrintCapturePOC Test Backend" "Local terminal test backend"\n'
+  exit 0
+fi
+
+# CUPS backend arguments: job-id user title copies options [file]
+job_id="$1"
+copies="$4"
+device_uri="${DEVICE_URI:-capture:/tmp/printcapture-output}"
+output_dir="${device_uri#capture:}"
+mkdir -p "$output_dir"
+
+if [[ $# -ge 6 ]]; then
+  input="$6"
+  for ((copy = 1; copy <= copies; copy++)); do
+    cp -- "$input" "$output_dir/printed_job_${job_id}_copy_${copy}.bin"
+  done
+else
+  temporary="$output_dir/printed_job_${job_id}.receiving"
+  cat >"$temporary"
+  for ((copy = 1; copy <= copies; copy++)); do
+    cp -- "$temporary" "$output_dir/printed_job_${job_id}_copy_${copy}.bin"
+  done
+  rm -- "$temporary"
+fi
+
+printf 'INFO: PrintCapturePOC backend accepted job %s\n' "$job_id" >&2

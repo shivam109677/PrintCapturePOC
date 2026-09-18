@@ -1,0 +1,16 @@
+bin/
+obj/
+captured_jobs/*
+!captured_jobs/.gitkeep
+captured_jobs_linux/*
+!captured_jobs_linux/.gitkeep
+printed_jobs/*
+!printed_jobs/.gitkeep
+logs/*
+!logs/.gitkeep
+mock_server/received_jobs/
+__pycache__/
+.cups-sandbox/
+linux/frontend/config.json
+*.user
+*.suo

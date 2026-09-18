@@ -1,0 +1,6 @@
+PrintCapturePOC Linux/CUPS terminal test
+
+If this document reaches the fake IPP printer, normal CUPS submission,
+queue detection, metadata capture, and spool data capture are working.
+
+No physical printer is required for this sandbox test.

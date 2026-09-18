@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrintCapture", "src\PrintCapture\PrintCapture.csproj", "{6A39A7B0-CE84-4CE0-9D3D-9020F0F07F72}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrintMonitor", "src\PrintMonitor\PrintMonitor.csproj", "{DDCE0227-4586-4D34-A778-D4D23B141144}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6A39A7B0-CE84-4CE0-9D3D-9020F0F07F72}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6A39A7B0-CE84-4CE0-9D3D-9020F0F07F72}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6A39A7B0-CE84-4CE0-9D3D-9020F0F07F72}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6A39A7B0-CE84-4CE0-9D3D-9020F0F07F72}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DDCE0227-4586-4D34-A778-D4D23B141144}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DDCE0227-4586-4D34-A778-D4D23B141144}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DDCE0227-4586-4D34-A778-D4D23B141144}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DDCE0227-4586-4D34-A778-D4D23B141144}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
