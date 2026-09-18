@@ -5,7 +5,22 @@ on:
   pull_request:
 
 jobs:
-  build-and-check:
+  cross-platform-dotnet:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Build shared Print & Save app
+        run: dotnet build src/PrintSaveApp/PrintSaveApp.csproj -c Release
+      - name: Test IPP codec
+        run: dotnet run --project src/PrintSaveApp/PrintSaveApp.csproj -c Release --no-build -- --self-test
+
+  platform-experiments:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -15,7 +30,7 @@ jobs:
       - name: Install Linux test dependencies
         run: sudo apt-get update && sudo apt-get install -y python3-cups python3-fastapi python3-multipart python3-uvicorn
       - name: Build Windows monitor
-        run: dotnet build PrintCapturePOC.sln -c Release
+        run: dotnet build src/PrintMonitor/PrintMonitor.csproj -c Release
       - name: Check Python
         run: python3 -m py_compile linux/monitor_cups.py linux/frontend/app.py mock_server/app.py
       - name: Check shell scripts

@@ -1,8 +1,31 @@
 # PrintCapturePOC
 
-A deliberately small, passive Windows print-spooler experiment. It detects jobs on installed local and connected queues, records `JOB_INFO_2` metadata, and makes a best-effort copy of the corresponding `.SPL` and `.SHD` files. It never pauses, redirects, modifies, or cancels a print job.
+This repository has a shared **Print & Save** app that runs on Windows, macOS, and Linux. The user selects a document in a local browser page; the app saves the exact source plus JSON metadata and SHA-256, then sends that same file directly to an IPP network printer. It does not require CUPS on Windows or macOS.
 
-The repository now also contains a working Linux **Print & Save** frontend: it archives the exact selected source plus metadata and SHA-256 before submitting it to a configured IPP/CUPS printer. See the [cross-platform plan](docs/CROSS_PLATFORM_PLAN.md) for the distinction between this portable controlled workflow and OS-specific monitoring of prints from every application.
+It also contains OS-specific passive monitoring experiments. The Windows monitor detects jobs submitted by other applications and makes a best-effort copy of `.SPL`/`.SHD` files. The Linux monitor performs the comparable CUPS experiment. Monitoring every application's jobs cannot use one portable implementation because each OS protects and represents spool data differently.
+
+## Cross-platform Print & Save app
+
+Requirements for a source checkout: [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) and an IPP/IPPS network printer that supports the selected document format. The configured test printer is `ipp://192.168.8.43/ipp/print`.
+
+Windows PowerShell:
+
+```powershell
+cd PrintCapturePOC
+.\scripts\Run-PrintSave.ps1
+```
+
+macOS or Linux Terminal:
+
+```bash
+cd PrintCapturePOC
+chmod +x scripts/Run-PrintSave.sh
+./scripts/Run-PrintSave.sh
+```
+
+The app opens `http://127.0.0.1:8765`. Save/test the printer, choose a file, and click **Print and save locally**. The archive is written to `Documents/PrintCapturePOC/printed_jobs`, including `metadata.json` and the exact selected source. Printer settings are local to each computer under the user's `.printcapturepoc` folder and are not committed.
+
+PDF and JPEG are the safest portable inputs. Other formats work only when the printer reports that MIME type as supported; otherwise export to PDF first. This controlled app captures only prints initiated from its own page. See the [cross-platform plan](docs/CROSS_PLATFORM_PLAN.md) for why capturing all prints from Chrome, Word, Preview, and other applications remains OS-specific.
 
 ## Linux/CUPS version
 

@@ -4,7 +4,7 @@ The project has two related but technically different product modes. Keeping the
 
 ## Mode A: controlled Print & Save
 
-The user opens this application, selects a document, and clicks Print. The application archives the exact selected source and metadata before sending it to the printer. This is the working Linux frontend today.
+The user opens this application, selects a document, and clicks Print. The application archives the exact selected source and metadata before sending it to the printer. This is implemented as the shared .NET 8 `PrintSaveApp` on Windows, macOS, and Linux.
 
 This mode can share one UI and job model across Windows, macOS, and Linux:
 
@@ -16,15 +16,14 @@ Shared UI
   -> optional upload adapter
 ```
 
-Recommended production implementation:
+Current POC implementation:
 
-- Shared desktop UI: Avalonia on .NET 8, or a signed local-webview shell around the existing local UI.
-- Shared archive module: job directory, source bytes, metadata JSON, hashing, retention and upload queue.
-- `IPrintAdapter` interface: discover printers, validate capabilities, submit, query status, cancel only when the user explicitly requests it.
-- Windows adapter: Windows Print Spooler/PrintTicket APIs.
-- Linux adapter: CUPS/IPP.
-- macOS adapter: CUPS/IPP initially, followed by native PrintCore where signing/sandbox rules require it.
-- Direct IPP adapter: optional for known IPP Everywhere printers. It provides the most consistent cross-platform path when the selected printer accepts PDF/JPEG/Office formats directly.
+- Shared local browser UI hosted by ASP.NET Core.
+- Shared archive module: exact source, metadata JSON and SHA-256.
+- Direct IPP adapter: printer validation, submission and job-status query without an OS printer driver.
+- CI builds and tests the shared app on Windows, macOS and Linux; release automation produces self-contained packages.
+
+Production still needs signed installers/notarization, automatic updates, retention controls and a durable upload queue.
 
 Mode A guarantees the archived source because the application controls submission. It does not capture jobs initiated in Chrome, Word, Preview, or other applications.
 

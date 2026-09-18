@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PrintCapturePOC</title>
+<style>
+:root{font-family:Inter,system-ui,sans-serif;color:#18202a;background:#eef2f6}*{box-sizing:border-box}body{margin:0;padding:36px 16px}.wrap{max-width:760px;margin:auto}.card{background:white;border-radius:16px;padding:24px;margin:0 0 18px;box-shadow:0 8px 28px #24354a18}h1{margin:0 0 6px}h2{font-size:18px;margin:0 0 16px}.sub{color:#607080;margin:0 0 24px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.full{grid-column:1/-1}label{display:block;font-size:13px;font-weight:650;margin-bottom:5px}input,select,button{width:100%;font:inherit;border-radius:9px;border:1px solid #c7d0da;padding:11px}button{background:#1769e0;color:white;border:0;font-weight:700;cursor:pointer}button.secondary{background:#e9eff8;color:#214263}button:disabled{opacity:.55}.status{padding:11px;border-radius:9px;background:#edf3fa;color:#38516b;white-space:pre-wrap}.ok{background:#e7f7ec;color:#176533}.bad{background:#fdebec;color:#9b262c}.drop{border:2px dashed #b5c2d1;padding:24px;text-align:center;border-radius:12px;background:#f8fafc}.result{font-family:ui-monospace,monospace;font-size:13px;overflow-wrap:anywhere}@media(max-width:600px){.grid{grid-template-columns:1fr}.full{grid-column:auto}}
+</style></head><body><main class="wrap">
+<h1>Print & Save</h1><p class="sub">Print to your configured network printer and archive the exact submitted file locally.</p>
+<section class="card"><h2>1. Printer</h2><form id="settings" class="grid">
+<div class="full"><label for="uri">Printer IPP address</label><input id="uri" value="ipp://192.168.8.43/ipp/print" required></div>
+<div class="full"><label for="name">Display name (optional)</label><input id="name" placeholder="Office printer"></div>
+<button type="submit">Save and test printer</button><button class="secondary" type="button" id="refresh">Refresh status</button>
+</form><p id="printerStatus" class="status">Checking configuration…</p></section>
+<section class="card"><h2>2. Select and print</h2><form id="printForm" class="grid">
+<div class="drop full"><label for="document">PDF, JPEG, text, PostScript, PCL, or a printer-supported Office file</label><input id="document" name="document" type="file" required></div>
+<div><label for="copies">Copies</label><input id="copies" name="copies" type="number" min="1" max="99" value="1"></div>
+<div><label for="color">Colour mode</label><select id="color" name="color"><option value="auto">Printer default</option><option value="color">Colour</option><option value="monochrome">Black & white</option></select></div>
+<button class="full" type="submit" id="printButton">Print and save locally</button>
+</form><p id="result" class="status result">No job submitted yet.</p></section>
+<p class="sub" id="archive"></p>
+</main><script>
+const $=id=>document.getElementById(id); const printerStatus=$('printerStatus'), result=$('result');
+async function json(url,options){const r=await fetch(url,options);const data=await r.json();if(!r.ok)throw new Error(data.error||data.status||JSON.stringify(data));return data}
+function show(el,text,kind=''){el.textContent=text;el.className='status '+kind}
+async function load(){try{const d=await json('/api/settings');$('archive').textContent='Local archive: '+d.archiveRoot;if(d.settings){$('uri').value=d.settings.printerUri;$('name').value=d.settings.displayName||''}await refresh()}catch(e){show(printerStatus,e.message,'bad')}}
+async function refresh(){show(printerStatus,'Checking printer…');try{const d=await json('/api/status');if(!d.configured)return show(printerStatus,'Enter the IPP address, then save and test.');if(!d.online)return show(printerStatus,'Offline: '+d.error,'bad');const p=d.printer;show(printerStatus,`${p.name} — ${p.acceptingJobs?'ready for jobs':'not accepting jobs'}\nFormats: ${p.formats.join(', ')}`,'ok')}catch(e){show(printerStatus,e.message,'bad')}}
+$('settings').addEventListener('submit',async e=>{e.preventDefault();show(printerStatus,'Testing printer…');try{const d=await json('/api/settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({printerUri:$('uri').value.trim(),displayName:$('name').value.trim()})});$('name').value=d.settings.displayName;show(printerStatus,`${d.printer.name} is reachable and ready.`,'ok')}catch(e){show(printerStatus,e.message,'bad')}});
+$('refresh').onclick=refresh;
+$('printForm').addEventListener('submit',async e=>{e.preventDefault();const button=$('printButton');button.disabled=true;show(result,'Saving the original and submitting it to the printer…');try{const d=await json('/api/print',{method:'POST',body:new FormData(e.target)});show(result,`Submitted as printer job ${d.jobId}.\nSaved: ${d.localDirectory}\nSHA-256: ${d.sha256}`,'ok')}catch(e){show(result,e.message,'bad')}finally{button.disabled=false}});
+load();
+</script></body></html>

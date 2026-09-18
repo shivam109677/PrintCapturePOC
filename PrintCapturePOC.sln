@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrintCapture", "src\PrintCa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrintMonitor", "src\PrintMonitor\PrintMonitor.csproj", "{DDCE0227-4586-4D34-A778-D4D23B141144}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrintSaveApp", "src\PrintSaveApp\PrintSaveApp.csproj", "{B7F14003-AFD4-4FC5-9EA4-BB550E89011D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,5 +23,9 @@ Global
 		{DDCE0227-4586-4D34-A778-D4D23B141144}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DDCE0227-4586-4D34-A778-D4D23B141144}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DDCE0227-4586-4D34-A778-D4D23B141144}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B7F14003-AFD4-4FC5-9EA4-BB550E89011D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B7F14003-AFD4-4FC5-9EA4-BB550E89011D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B7F14003-AFD4-4FC5-9EA4-BB550E89011D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B7F14003-AFD4-4FC5-9EA4-BB550E89011D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

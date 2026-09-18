@@ -1,5 +1,6 @@
 bin/
 obj/
+artifacts/
 captured_jobs/*
 !captured_jobs/.gitkeep
 captured_jobs_linux/*
