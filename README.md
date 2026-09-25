@@ -4,6 +4,19 @@ This repository has a shared **Print & Save** app that runs on Windows, macOS, a
 
 It also contains OS-specific passive monitoring experiments. The Windows monitor detects jobs submitted by other applications and makes a best-effort copy of `.SPL`/`.SHD` files. The Linux monitor performs the comparable CUPS experiment. Monitoring every application's jobs cannot use one portable implementation because each OS protects and represents spool data differently.
 
+## Automatically select the passive monitor
+
+The unified launcher detects Windows or Linux and starts that platform's monitor. From the repository root, build once and run:
+
+```sh
+dotnet build PrintCapturePOC.sln -c Release
+dotnet run --project src/PrintCaptureLauncher --
+```
+
+On Windows, open the terminal as Administrator to capture spool files. On Linux, the launcher requests `sudo` for access to CUPS spool files; install `python3-cups` and have CUPS running first. The launcher stores Windows captures in `captured_jobs/` and Linux captures in `captured_jobs_linux/`. Pass monitor options after `--`, for example `dotnet run --project src/PrintCaptureLauncher -- --no-spool-capture` for metadata-only monitoring.
+
+The passive monitor supports Windows and Linux. macOS can run the shared Print & Save app below, but this repository does not include a macOS passive print-queue monitor.
+
 ## Cross-platform Print & Save app
 
 Requirements for a source checkout: [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) and an IPP/IPPS network printer that supports the selected document format. The configured test printer is `ipp://192.168.8.43/ipp/print`.

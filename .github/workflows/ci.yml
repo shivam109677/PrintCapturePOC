@@ -17,8 +17,15 @@ jobs:
           dotnet-version: 8.0.x
       - name: Build shared Print & Save app
         run: dotnet build src/PrintSaveApp/PrintSaveApp.csproj -c Release
+      - name: Build automatic monitor launcher
+        run: dotnet build src/PrintCaptureLauncher/PrintCaptureLauncher.csproj -c Release
       - name: Test IPP codec
         run: dotnet run --project src/PrintSaveApp/PrintSaveApp.csproj -c Release --no-build -- --self-test
+      - name: Check Windows and Linux routing
+        shell: pwsh
+        run: |
+          dotnet run --project src/PrintCaptureLauncher/PrintCaptureLauncher.csproj -c Release --no-build -- --dry-run --platform windows
+          dotnet run --project src/PrintCaptureLauncher/PrintCaptureLauncher.csproj -c Release --no-build -- --dry-run --platform linux
 
   platform-experiments:
     runs-on: ubuntu-latest

@@ -9,6 +9,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrintMonitor", "src\PrintMo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrintSaveApp", "src\PrintSaveApp\PrintSaveApp.csproj", "{B7F14003-AFD4-4FC5-9EA4-BB550E89011D}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{16678743-9BEC-410E-8276-8656AA21A592}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrintCaptureLauncher", "src\PrintCaptureLauncher\PrintCaptureLauncher.csproj", "{6739323E-7EE6-452B-B281-8EDF7629E9CA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,5 +31,12 @@ Global
 		{B7F14003-AFD4-4FC5-9EA4-BB550E89011D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B7F14003-AFD4-4FC5-9EA4-BB550E89011D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B7F14003-AFD4-4FC5-9EA4-BB550E89011D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6739323E-7EE6-452B-B281-8EDF7629E9CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6739323E-7EE6-452B-B281-8EDF7629E9CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6739323E-7EE6-452B-B281-8EDF7629E9CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6739323E-7EE6-452B-B281-8EDF7629E9CA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{6739323E-7EE6-452B-B281-8EDF7629E9CA} = {16678743-9BEC-410E-8276-8656AA21A592}
 	EndGlobalSection
 EndGlobal
