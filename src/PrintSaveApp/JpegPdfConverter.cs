@@ -1,19 +1,21 @@
 using System.Buffers.Binary;
 using System.Globalization;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace PrintSaveApp;
 
 /// <summary>Wraps a JPEG image in a one-page PDF without decoding or changing its source bytes.</summary>
 internal static class JpegPdfConverter
 {
-    private const double PageWidth = 612;
-    private const double PageHeight = 792;
+    private const double Margin = 36;
 
-    public static async Task ConvertAsync(string jpegPath, string pdfPath, CancellationToken cancellationToken)
+    public static async Task ConvertAsync(string jpegPath, string pdfPath, string? mediaDefault,
+        CancellationToken cancellationToken)
     {
         var jpeg = await File.ReadAllBytesAsync(jpegPath, cancellationToken);
         var (width, height, components) = ReadDimensions(jpeg);
+        var (pageWidth, pageHeight) = GetPageSize(mediaDefault);
         var colorSpace = components switch
         {
             1 => "/DeviceGray",
@@ -22,11 +24,11 @@ internal static class JpegPdfConverter
             _ => throw new InvalidDataException($"Unsupported JPEG color components: {components}")
         };
 
-        var scale = Math.Min(PageWidth / width, PageHeight / height);
+        var scale = Math.Min((pageWidth - 2 * Margin) / width, (pageHeight - 2 * Margin) / height);
         var drawWidth = width * scale;
         var drawHeight = height * scale;
-        var x = (PageWidth - drawWidth) / 2;
-        var y = (PageHeight - drawHeight) / 2;
+        var x = (pageWidth - drawWidth) / 2;
+        var y = (pageHeight - drawHeight) / 2;
         var content = Encoding.ASCII.GetBytes(string.Format(CultureInfo.InvariantCulture,
             "q {0:0.###} 0 0 {1:0.###} {2:0.###} {3:0.###} cm /Im0 Do Q\n",
             drawWidth, drawHeight, x, y));
@@ -36,7 +38,9 @@ internal static class JpegPdfConverter
         var offsets = new long[6];
         WriteObject(1, "<< /Type /Catalog /Pages 2 0 R >>");
         WriteObject(2, "<< /Type /Pages /Kids [3 0 R] /Count 1 >>");
-        WriteObject(3, "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /XObject << /Im0 5 0 R >> >> /Contents 4 0 R >>");
+        WriteObject(3, string.Format(CultureInfo.InvariantCulture,
+            "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 {0:0.###} {1:0.###}] /Resources << /XObject << /Im0 5 0 R >> >> /Contents 4 0 R >>",
+            pageWidth, pageHeight));
         offsets[4] = output.Position;
         WriteAscii(output, $"4 0 obj\n<< /Length {content.Length} >>\nstream\n");
         output.Write(content);
@@ -88,6 +92,22 @@ internal static class JpegPdfConverter
             offset += length;
         }
         throw new InvalidDataException("Could not read image dimensions from the selected JPEG.");
+    }
+
+    private static (double Width, double Height) GetPageSize(string? mediaDefault)
+    {
+        // The printer's default media name normally ends in dimensions, for example
+        // "iso_a4_210x297mm" or "na_letter_8.5x11in". Use A4 if it omits them.
+        var match = Regex.Match(mediaDefault ?? string.Empty,
+            @"(?<width>\d+(?:\.\d+)?)x(?<height>\d+(?:\.\d+)?)(?<unit>mm|in)$",
+            RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        if (!match.Success) return (595.276, 841.89);
+
+        var width = double.Parse(match.Groups["width"].Value, CultureInfo.InvariantCulture);
+        var height = double.Parse(match.Groups["height"].Value, CultureInfo.InvariantCulture);
+        var pointsPerUnit = match.Groups["unit"].Value.Equals("mm", StringComparison.OrdinalIgnoreCase)
+            ? 72 / 25.4 : 72;
+        return (width * pointsPerUnit, height * pointsPerUnit);
     }
 
     private static void WriteAscii(Stream stream, string value) => stream.Write(Encoding.ASCII.GetBytes(value));

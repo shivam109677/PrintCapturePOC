@@ -115,19 +115,22 @@ public static class Program
             try
             {
                 IppPrintResult result;
-                try
-                {
-                    result = await ipp.PrintAsync(settings.PrinterUri, archivedPath, originalName, mime, copies, color, ct);
-                }
-                catch (IppStatusException ex) when (mime == "image/jpeg" && ex.StatusCode == 0x0507)
+                if (mime == "image/jpeg")
                 {
                     var printer = await ipp.GetPrinterStatusAsync(settings.PrinterUri, ct);
-                    if (!printer.Formats.Contains("application/pdf", StringComparer.OrdinalIgnoreCase)) throw;
-                    convertedPath = Path.Combine(temporaryDirectory, "print_image.pdf");
-                    await JpegPdfConverter.ConvertAsync(archivedPath, convertedPath, ct);
-                    metadata.SubmittedFormat = "application/pdf (converted from image/jpeg)";
-                    result = await ipp.PrintAsync(settings.PrinterUri, convertedPath, originalName, "application/pdf", copies, color, ct);
+                    if (printer.Formats.Contains("application/pdf", StringComparer.OrdinalIgnoreCase))
+                    {
+                        convertedPath = Path.Combine(temporaryDirectory, "print_image.pdf");
+                        await JpegPdfConverter.ConvertAsync(archivedPath, convertedPath, printer.MediaDefault, ct);
+                        metadata.SubmittedFormat = "application/pdf (image/jpeg fitted to page)";
+                        result = await ipp.PrintAsync(settings.PrinterUri, convertedPath, originalName, "application/pdf", copies, color, ct);
+                    }
+                    else
+                    {
+                        result = await ipp.PrintAsync(settings.PrinterUri, archivedPath, originalName, mime, copies, color, ct);
+                    }
                 }
+                else result = await ipp.PrintAsync(settings.PrinterUri, archivedPath, originalName, mime, copies, color, ct);
                 if (convertedPath is not null)
                 {
                     File.Delete(convertedPath);

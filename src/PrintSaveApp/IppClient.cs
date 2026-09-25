@@ -20,6 +20,7 @@ public sealed class IppClient(HttpClient httpClient)
             .Additional(0x44, "printer-state-reasons")
             .Additional(0x44, "printer-is-accepting-jobs")
             .Additional(0x44, "document-format-supported")
+            .Additional(0x44, "media-default")
             .End();
         var response = await SendAsync(printerUri, request.Bytes, null, cancellationToken);
         EnsureSuccess(response);
@@ -28,7 +29,8 @@ public sealed class IppClient(HttpClient httpClient)
             response.Integer("printer-state") ?? 0,
             response.Boolean("printer-is-accepting-jobs") ?? false,
             response.Strings("printer-state-reasons"),
-            response.Strings("document-format-supported"));
+            response.Strings("document-format-supported"),
+            response.String("media-default"));
     }
 
     public async Task<IppPrintResult> PrintAsync(string printerUri, string path, string documentName,
@@ -104,7 +106,7 @@ public sealed class IppClient(HttpClient httpClient)
     private static void EnsureSuccess(IppResponse response)
     {
         if (response.StatusCode > 0x00FF)
-            throw new IppStatusException(response.StatusCode);
+            throw new InvalidOperationException($"IPP request failed with status 0x{response.StatusCode:X4}");
     }
 
     public static void RunCodecSelfTest()
@@ -121,12 +123,6 @@ public sealed class IppClient(HttpClient httpClient)
         if (parsed.StatusCode != 0 || parsed.Integer("job-id") != 42)
             throw new InvalidOperationException("IPP codec self-test failed");
     }
-}
-
-public sealed class IppStatusException(ushort statusCode)
-    : InvalidOperationException($"IPP request failed with status 0x{statusCode:X4}")
-{
-    public ushort StatusCode { get; } = statusCode;
 }
 
 internal sealed class IppRequest(ushort operation, int requestId)
@@ -216,6 +212,7 @@ internal sealed class IppDocumentContent(byte[] header, string path) : HttpConte
     }
 }
 
-public sealed record IppPrinterStatus(string Name, int State, bool AcceptingJobs, List<string> Reasons, List<string> Formats);
+public sealed record IppPrinterStatus(string Name, int State, bool AcceptingJobs, List<string> Reasons,
+    List<string> Formats, string? MediaDefault);
 public sealed record IppPrintResult(int JobId, string? JobUri, ushort StatusCode);
 public sealed record IppJobStatus(int State, List<string> Reasons, int? TotalPages, int? PagesCompleted);
