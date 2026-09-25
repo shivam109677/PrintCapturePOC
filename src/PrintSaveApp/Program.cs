@@ -108,12 +108,31 @@ public static class Program
             {
                 DocumentName = originalName, ArchivedFile = archivedPath, Bytes = upload.Length, Sha256 = hash,
                 PrinterUri = settings.PrinterUri, PrinterName = settings.DisplayName, Copies = copies,
-                ColorMode = color, LocalDirectory = temporaryDirectory
+                ColorMode = color, LocalDirectory = temporaryDirectory, SubmittedFormat = mime
             };
             await WriteMetadata(metadata, ct);
+            string? convertedPath = null;
             try
             {
-                var result = await ipp.PrintAsync(settings.PrinterUri, archivedPath, originalName, mime, copies, color, ct);
+                IppPrintResult result;
+                try
+                {
+                    result = await ipp.PrintAsync(settings.PrinterUri, archivedPath, originalName, mime, copies, color, ct);
+                }
+                catch (IppStatusException ex) when (mime == "image/jpeg" && ex.StatusCode == 0x0507)
+                {
+                    var printer = await ipp.GetPrinterStatusAsync(settings.PrinterUri, ct);
+                    if (!printer.Formats.Contains("application/pdf", StringComparer.OrdinalIgnoreCase)) throw;
+                    convertedPath = Path.Combine(temporaryDirectory, "print_image.pdf");
+                    await JpegPdfConverter.ConvertAsync(archivedPath, convertedPath, ct);
+                    metadata.SubmittedFormat = "application/pdf (converted from image/jpeg)";
+                    result = await ipp.PrintAsync(settings.PrinterUri, convertedPath, originalName, "application/pdf", copies, color, ct);
+                }
+                if (convertedPath is not null)
+                {
+                    File.Delete(convertedPath);
+                    convertedPath = null;
+                }
                 metadata.JobId = result.JobId;
                 metadata.JobUri = result.JobUri;
                 metadata.StatusCode = result.StatusCode;
@@ -129,6 +148,7 @@ public static class Program
             }
             catch (Exception ex)
             {
+                if (convertedPath is not null && File.Exists(convertedPath)) File.Delete(convertedPath);
                 metadata.Status = "Capture saved; print submission failed";
                 metadata.Error = SafeMessage(ex);
                 metadata.LastUpdatedAt = DateTimeOffset.Now;

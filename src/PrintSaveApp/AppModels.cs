@@ -56,6 +56,7 @@ public sealed class ArchivedJob
     public string ComputerName { get; init; } = Environment.MachineName;
     public required string PrinterUri { get; init; }
     public required string PrinterName { get; init; }
+    public string SubmittedFormat { get; set; } = "application/octet-stream";
     public int Copies { get; init; }
     public required string ColorMode { get; init; }
     public DateTimeOffset SubmittedAt { get; init; } = DateTimeOffset.Now;

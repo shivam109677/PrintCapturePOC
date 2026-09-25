@@ -104,7 +104,7 @@ public sealed class IppClient(HttpClient httpClient)
     private static void EnsureSuccess(IppResponse response)
     {
         if (response.StatusCode > 0x00FF)
-            throw new InvalidOperationException($"IPP request failed with status 0x{response.StatusCode:X4}");
+            throw new IppStatusException(response.StatusCode);
     }
 
     public static void RunCodecSelfTest()
@@ -121,6 +121,12 @@ public sealed class IppClient(HttpClient httpClient)
         if (parsed.StatusCode != 0 || parsed.Integer("job-id") != 42)
             throw new InvalidOperationException("IPP codec self-test failed");
     }
+}
+
+public sealed class IppStatusException(ushort statusCode)
+    : InvalidOperationException($"IPP request failed with status 0x{statusCode:X4}")
+{
+    public ushort StatusCode { get; } = statusCode;
 }
 
 internal sealed class IppRequest(ushort operation, int requestId)

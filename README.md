@@ -38,7 +38,7 @@ chmod +x scripts/Run-PrintSave.sh
 
 The app opens `http://127.0.0.1:8765`. Save/test the printer, choose a file, and click **Print and save locally**. The archive is written to `Documents/PrintCapturePOC/printed_jobs`, including `metadata.json` and the exact selected source. Printer settings are local to each computer under the user's `.printcapturepoc` folder and are not committed.
 
-PDF and JPEG are the safest portable inputs. Other formats work only when the printer reports that MIME type as supported; otherwise export to PDF first. This controlled app captures only prints initiated from its own page. See the [cross-platform plan](docs/CROSS_PLATFORM_PLAN.md) for why capturing all prints from Chrome, Word, Preview, and other applications remains OS-specific.
+PDF and JPEG are the safest portable inputs. JPEG images are archived unchanged and sent directly when supported; if a printer rejects `image/jpeg` but supports PDF, the app wraps the JPEG in a temporary one-page PDF for printing while keeping the original JPEG in the archive. Other formats work only when the printer reports that MIME type as supported; otherwise export to PDF first. This controlled app captures only prints initiated from its own page. See the [cross-platform plan](docs/CROSS_PLATFORM_PLAN.md) for why capturing all prints from Chrome, Word, Preview, and other applications remains OS-specific.
 
 ## Linux/CUPS version
 
